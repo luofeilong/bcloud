@@ -288,6 +288,7 @@ def get_bdstoken(cookie):
     这些token对于之后的请求非常重要.
     '''
     url = const.PAN_REFERER
+    print(cookie.header_output())
     req = net.urlopen(url, headers={'Cookie': cookie.header_output()})
     if req:
         return parse_bdstoken(req.data.decode())

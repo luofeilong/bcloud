@@ -715,7 +715,10 @@ def get_download_link(cookie, tokens, path):
         logger.error('pcs.get_download_link(): %s' % metas)
         return None
     dlink = metas['info'][0]['dlink']
-    url = '{0}&cflg={1}'.format(dlink, cookie.get('cflag').value)
+    if cookie.get('cflag'):
+        url = '{0}&cflg={1}'.format(dlink, cookie.get('cflag').value)
+    else:
+        url = '{0}&cflg={1}'.format(dlink, 1)
     req = net.urlopen_without_redirect(url, headers={
         'Cookie': cookie.sub_output('BAIDUID', 'BDUSS', 'cflag'),
         'Accept': const.ACCEPT_HTML,

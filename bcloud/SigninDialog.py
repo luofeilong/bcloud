@@ -9,6 +9,7 @@ import time
 
 from gi.repository import GLib
 from gi.repository import Gtk
+from gi.repository import WebKit
 
 from bcloud import auth
 from bcloud import Config
@@ -21,6 +22,37 @@ from bcloud import Widgets
 
 DELTA = 1 * 24 * 60 * 60   # 1 days
 
+class SignInQQDialog(Gtk.Dialog):
+    def __init__(self, parent):
+        super().__init__('sign in QQ', None, Gtk.DialogFlags.MODAL)
+
+        self.view = WebKit.WebView()
+        sw = Gtk.ScrolledWindow()
+        sw.add(self.view)
+        self.set_default_size(700, 400)
+        box = self.get_content_area()
+        box.pack_start(sw, True, True, 0)
+        box.show_all()
+        self.view.open("http://passport.baidu.com/phoenix/account/startlogin?u=http://pan.baidu.com&type=15&display=pc&tpl=netdisk&act=implicit")
+        self.view.connect("load-finished", self.view_load_finished)
+
+    def view_load_finished(self, view, frame=None):
+        print(view.props.uri)
+
+        frame = self.view.get_main_frame()
+        print(frame.get_title())
+
+        if view.props.uri.find('http://passport.baidu.com/phoenix/account/afterauth?mkey=') == 0:
+            #self.htmlData = str(self.webView.page().currentFrame().documentElement().toInnerXml())
+            print('login success')
+            self.data = frame.get_data_source().get_data().str
+            print(self.data)
+            self.close()
+            self.response(Gtk.ResponseType.OK)
+
+    def ShowLoginDialog(self):
+        self.run()
+        return self.data
 
 class SigninVcodeDialog(Gtk.Dialog):
     '''登陆时的验证码对话框'''
@@ -179,6 +211,12 @@ class SigninDialog(Gtk.Dialog):
         self.signin_button.connect('clicked', self.on_signin_button_clicked)
         box.pack_start(self.signin_button, False, False, 0)
 
+
+        self.signinQQ_button = Gtk.Button.new_with_label(_('Sign in QQ'))
+        self.signinQQ_button.props.margin_top = 10
+        self.signinQQ_button.connect('clicked', self.on_signinQQ_button_clicked)
+        box.pack_start(self.signinQQ_button, False, False, 0)
+
         self.infobar = Gtk.InfoBar()
         self.infobar.set_message_type(Gtk.MessageType.ERROR)
         box.pack_end(self.infobar, False, False, 0)
@@ -271,6 +309,59 @@ class SigninDialog(Gtk.Dialog):
         button.set_label(_('In process...'))
         button.set_sensitive(False)
         self.signin()
+
+    def on_signinQQ_button_clicked(self, button):
+        # if (len(self.password_entry.get_text()) <= 1 or
+        #         not self.username_combo.get_child().get_text()):
+        #     return
+        # self.infobar.hide()
+        # button.set_label(_('In process...'))
+        # button.set_sensitive(False)
+        # self.signin()
+
+        dialog = SignInQQDialog(self)
+        data = dialog.ShowLoginDialog()
+        if data == None:
+            return
+
+        cookie = RequestCookie()
+        tokens = {}
+        username = ''
+
+        index = data.find('<bduss>')
+        index2 = data.find('</bduss>')
+        if index > 0 and index2 > 0:
+            temp = []
+            temp.append(''.join("BDUSS=%s"%data[index:index2]))
+            tokens['bduss'] = data[index:index2]
+            cookie.load_list(temp)
+
+        index = data.find('<ptoken>')
+        index2 = data.find('</ptoken>')
+        if index > 0 and index2 > 0:
+            temp = []
+            temp.append(''.join("ptoken=%s"%data[index:index2]))
+            tokens['ptoken'] = data[index:index2]
+            cookie.load_list(temp)
+
+        index = data.find('<display_name>')
+        index2 = data.find('</display_name>')
+        if index > 0 and index2 > 0:
+            username = data[index:index2]
+
+        def on_get_bdstoken(bdstoken, error=None):
+            if error or not bdstoken:
+                logger.error('SigninDialog.on_get_bdstoken: %s, %s' % (bdstoken, error))
+                self.login_failed(('Failed to get bdstoken!'))
+            else:
+                tokens['bdstoken'] = bdstoken
+                temp = []
+                temp.append(''.join("STOKEN=%s"%bdstoken))
+                cookie.load_list(temp)
+                self.update_profile(username, "", cookie, tokens, dump=True)
+
+        if data != "":
+            gutil.async_call(auth.get_bdstoken, cookie, callback=on_get_bdstoken)
 
     def on_password_entry_activate(self, entry):
         if (len(self.password_entry.get_text()) <= 1 or
