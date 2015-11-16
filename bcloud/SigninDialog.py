@@ -311,14 +311,6 @@ class SigninDialog(Gtk.Dialog):
         self.signin()
 
     def on_signinQQ_button_clicked(self, button):
-        # if (len(self.password_entry.get_text()) <= 1 or
-        #         not self.username_combo.get_child().get_text()):
-        #     return
-        # self.infobar.hide()
-        # button.set_label(_('In process...'))
-        # button.set_sensitive(False)
-        # self.signin()
-
         dialog = SignInQQDialog(self)
         data = dialog.ShowLoginDialog()
         if data == None:
@@ -331,23 +323,21 @@ class SigninDialog(Gtk.Dialog):
         index = data.find('<bduss>')
         index2 = data.find('</bduss>')
         if index > 0 and index2 > 0:
-            temp = []
-            temp.append(''.join("BDUSS=%s"%data[index:index2]))
-            tokens['bduss'] = data[index:index2]
-            cookie.load_list(temp)
+            bduss = data[index+len('<bduss>'):index2]
+            tokens['bduss'] = bduss
+            cookie.load(''.join("BDUSS=%s" % bduss))
 
         index = data.find('<ptoken>')
         index2 = data.find('</ptoken>')
         if index > 0 and index2 > 0:
-            temp = []
-            temp.append(''.join("ptoken=%s"%data[index:index2]))
-            tokens['ptoken'] = data[index:index2]
-            cookie.load_list(temp)
+            ptoken = data[index+len('<ptoken>'):index2]
+            tokens['ptoken'] = ptoken
+            cookie.load(''.join("ptoken=%s"%ptoken))
 
         index = data.find('<display_name>')
         index2 = data.find('</display_name>')
         if index > 0 and index2 > 0:
-            username = data[index:index2]
+            username = data[index+len('<display_name>'):index2]
 
         def on_get_bdstoken(bdstoken, error=None):
             if error or not bdstoken:
@@ -355,9 +345,7 @@ class SigninDialog(Gtk.Dialog):
                 self.login_failed(('Failed to get bdstoken!'))
             else:
                 tokens['bdstoken'] = bdstoken
-                temp = []
-                temp.append(''.join("STOKEN=%s"%bdstoken))
-                cookie.load_list(temp)
+                cookie.load(''.join("STOKEN=%s"%bdstoken))
                 self.update_profile(username, "", cookie, tokens, dump=True)
 
         if data != "":

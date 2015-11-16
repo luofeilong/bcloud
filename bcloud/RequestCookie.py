@@ -5,6 +5,7 @@
 
 import http.cookies
 
+
 class RequestCookie(http.cookies.SimpleCookie):
     '''为SimpleCookie()类加入了一个新的方法, 将里面的cookie值输出为http
     request header里面的字段.
@@ -20,11 +21,7 @@ class RequestCookie(http.cookies.SimpleCookie):
         '''
         result = []
         for key in self.keys():
-            value = self.get(key).value
-            index = value.find('>')
-            if index > 0:
-                value = value[index+1:]
-            result.append(key + '=' + value)
+            result.append(key + '=' + self.get(key).value)
         return '; '.join(result)
 
     def sub_output(self, *keys):
@@ -32,11 +29,7 @@ class RequestCookie(http.cookies.SimpleCookie):
         result = []
         for key in keys:
             if self.get(key):
-                value = self.get(key).value
-                index = value.find('>')
-                if index > 0:
-                    value = value[index+1:]
-                result.append(key + '=' + value)
+                result.append(key + '=' + self.get(key).value)
         return '; '.join(result)
 
     def __str__(self):
