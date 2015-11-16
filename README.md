@@ -12,6 +12,7 @@ bcloud是百度网盘的linux客户端，是原版由[LiuLang](mailto:gsushzhsos
 
 ##联系
 如果你在使用该版本的过程中遇到了问题，可以联系我
+
 1. QQ：360777830
 2. email：[QQ邮箱](mailto:360777830@qq.com) / [Gmail](mailto:feilong.luo@gmail.com)
 
