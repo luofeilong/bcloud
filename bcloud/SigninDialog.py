@@ -35,18 +35,11 @@ class SignInQQDialog(Gtk.Dialog):
         box.show_all()
         self.view.open("http://passport.baidu.com/phoenix/account/startlogin?u=http://pan.baidu.com&type=15&display=pc&tpl=netdisk&act=implicit")
         self.view.connect("load-finished", self.view_load_finished)
+        self.data = None
 
     def view_load_finished(self, view, frame=None):
-        print(view.props.uri)
-
-        frame = self.view.get_main_frame()
-        print(frame.get_title())
-
         if view.props.uri.find('http://passport.baidu.com/phoenix/account/afterauth?mkey=') == 0:
-            #self.htmlData = str(self.webView.page().currentFrame().documentElement().toInnerXml())
-            print('login success')
             self.data = frame.get_data_source().get_data().str
-            print(self.data)
             self.close()
             self.response(Gtk.ResponseType.OK)
 
