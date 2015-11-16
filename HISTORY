@@ -1,3 +1,6 @@
+v3.8.2 - 2015.11.16
+* Add: sign in use qq account (by @luofeilong).
+
 v3.8.1 - 2015.9.9
 * Fixed: failed to sign in (pull#177, by @mhohai).
 
