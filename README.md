@@ -4,7 +4,11 @@ bcloud是百度网盘的linux客户端，是原版由[LiuLang](mailto:gsushzhsos
 
 ##修改记录
 
-1. 2015年11月16日 增加了使用QQ账号登陆，主要是我个人是使用QQ登陆百度网盘的，因此加了这个功能。
+* 2015年11月16日 增加了使用QQ账号登陆，主要是我个人是使用QQ登陆百度网盘的，因此加了这个功能。
+
+![](http://7xkznp.com1.z0.glb.clouddn.com/images/2015-11-16%2014%3A27%3A09%20bcloud%20login.png)
+![](http://7xkznp.com1.z0.glb.clouddn.com/images/2015-11-16%2014%3A36%3A26%20bcloud%20login%20qq.png)
+
 
 ##联系
 如果你在使用该版本的过程中遇到了问题，可以联系我
